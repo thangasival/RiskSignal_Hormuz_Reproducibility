@@ -24,5 +24,21 @@
     "50_percent": 1.6001861993,
     "70_percent": 0.4000465498,
     "90_percent": 0.0
-  }
+  },
+  "gate_policy_sensitivity_policies": 9,
+  "gate_policy_sensitivity_blocked": 9,
+  "gate_policy_coverage_floors": [
+    0.75,
+    0.9,
+    1.0
+  ],
+  "gate_policy_independent_cluster_floors": [
+    3,
+    5,
+    10
+  ],
+  "naive_timestamp_pre_onset_records": 10,
+  "naive_timestamp_pre_onset_episode_clusters": 6,
+  "evidence_gated_clean_pre_onset_records": 1,
+  "evidence_gated_clean_pre_onset_episode_clusters": 1
 }

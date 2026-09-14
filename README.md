@@ -12,6 +12,8 @@ The Phase 4 evidence gate is **BLOCKED**. The released outputs therefore do not 
 
 - Phase 4 registry: 291 metadata rows; 11 unresolved positive/update mappings remain ineligible for verified historical-warning claims.
 - Evidence gate: blocked; 3 independent clusters qualify versus a required minimum of 10.
+- Gate-policy sensitivity: all 9 combinations of 75%/90%/100% episode coverage and 3/5/10 independent-cluster floors remain blocked when zero unresolved historical-warning mappings is retained.
+- Naive-vs-gated ablation: a timestamp-only rule admits 10 apparent pre-onset records across 6 clusters; successive evidence-validity controls leave 1 clean pre-onset signal in 1 cluster.
 - Flow sensitivity: the 1 March 2026 anchor lies inside a detected interval in 216/216 specifications; a target-local E051 onset is identifiable in 213/216. Three 20%/long-recovery specifications merge E051 with a prior episode.
 - All 108 specifications using 50%–90% shortfall thresholds identify the major-to-catastrophic transition on 1 March 2026.
 - Pre-2024 background selectivity: median detected episodes/year is 1.6 at 50%, 0.4 at 70%, and 0 at 90% shortfall. These are background detections, not labeled false positives.
@@ -40,7 +42,7 @@ pip install -r requirements.txt
 python run_pipeline.py
 ```
 
-The default command reruns `phase4_evaluate`, `phase4_figures`, `flow_sensitivity`, and `flow_sensitivity_figures`. No network collection or download stage is included.
+The default command reruns `phase4_evaluate`, `gate_robustness`, `phase4_figures`, `flow_sensitivity`, and `flow_sensitivity_figures`. No network collection or download stage is included.
 
 ### Registry reconstruction limitation
 

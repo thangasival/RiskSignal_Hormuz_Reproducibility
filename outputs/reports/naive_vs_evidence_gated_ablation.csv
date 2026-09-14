@@ -1,0 +1,6 @@
+stage,rule,admitted_records,admitted_episode_clusters,admitted_signal_families
+naive_timestamp_only,positive/update record with days_from_onset < 0,10,6,9
+require_local_evidence,require physical local artifact,6,3,5
+remove_updates,exclude update records as independent signals,5,3,5
+require_historical_availability,exclude unverified historical availability,2,2,2
+exclude_prior_episode_overlap,exclude records inside another active flow episode,1,1,1

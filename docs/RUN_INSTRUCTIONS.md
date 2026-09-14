@@ -90,4 +90,6 @@ The expected `outputs/reports/evidence_coverage_gate.json` status is `blocked`, 
 
 `flow_sensitivity_results_for_manuscript.md` should report 216/216 anchor-interval captures, 213/216 target-local onsets, three low-threshold mergers, and 108/108 specifications at 50%-90% with onset on 2026-03-01. `pre2024_background_selectivity.csv` should also be regenerated.
 
+## Manuscript
 
+The ICASF manuscript should remain aligned to the blocked gate and the revised target-interval/target-local onset semantics.

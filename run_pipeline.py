@@ -5,11 +5,12 @@ from pathlib import Path
 STEPS = {
     "phase4_registry": "risksignal.build_multi_episode_registry",
     "phase4_evaluate": "risksignal.evaluate_multi_episode",
+    "gate_robustness": "risksignal.evaluate_gate_robustness",
     "phase4_figures": "risksignal.make_phase4_figures",
     "flow_sensitivity": "risksignal.evaluate_flow_sensitivity",
     "flow_sensitivity_figures": "risksignal.make_flow_sensitivity_figures",
 }
-DEFAULT_STEPS = ["phase4_evaluate", "phase4_figures", "flow_sensitivity", "flow_sensitivity_figures"]
+DEFAULT_STEPS = ["phase4_evaluate", "gate_robustness", "phase4_figures", "flow_sensitivity", "flow_sensitivity_figures"]
 
 def run_step(module: str, config: str | None) -> None:
     root = Path(__file__).resolve().parent

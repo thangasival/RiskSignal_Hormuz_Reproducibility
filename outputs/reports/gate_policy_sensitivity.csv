@@ -1,0 +1,10 @@
+minimum_episode_coverage,minimum_independent_clusters,eligible_independent_clusters,eligible_test_clusters,direct_source_classes,unresolved_historical_warning_mappings,status,blocking_checks
+0.75,3,4,4,5,11,blocked,no_unresolved_historical_warning_mappings
+0.75,5,4,4,5,11,blocked,coverage_and_cluster_floor;no_unresolved_historical_warning_mappings
+0.75,10,4,4,5,11,blocked,coverage_and_cluster_floor;no_unresolved_historical_warning_mappings
+0.9,3,3,3,5,11,blocked,no_unresolved_historical_warning_mappings
+0.9,5,3,3,5,11,blocked,coverage_and_cluster_floor;no_unresolved_historical_warning_mappings
+0.9,10,3,3,5,11,blocked,coverage_and_cluster_floor;no_unresolved_historical_warning_mappings
+1.0,3,3,3,5,11,blocked,no_unresolved_historical_warning_mappings
+1.0,5,3,3,5,11,blocked,coverage_and_cluster_floor;no_unresolved_historical_warning_mappings
+1.0,10,3,3,5,11,blocked,coverage_and_cluster_floor;no_unresolved_historical_warning_mappings

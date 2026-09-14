@@ -13,6 +13,13 @@ Status: **BLOCKED**
 
 The registry contains 291 metadata rows: 247 with local evidence and 44 metadata-reference-only rows. Complete clusters are E038, E042 and E045. E051 is 7/8 on required source-window coverage (87.5%), below the 90% threshold. Source-only/fusion metrics remain intentionally empty and the cluster-bootstrap report remains blocked.
 
+## Gate robustness and evidence ablation
+
+- Gate-policy sensitivity crossed episode-coverage floors of 75%, 90% and 100% with independent-cluster floors of 3, 5 and 10 while preserving the requirements of at least 3 temporal-test clusters, at least 2 direct source classes and 0 unresolved historical-warning mappings. All 9 policies remain **BLOCKED**.
+- At 75% coverage, at most 4 independent clusters qualify; at 90% and 100%, 3 qualify. Even the most permissive tested policy (75% coverage; 3 clusters) remains blocked by the 11 unresolved historical-warning mappings.
+- A timestamp-only naive rule admits 10 apparent pre-onset positive/update records across 6 episode clusters and 9 signal families. Requiring local evidence reduces this to 6 records/3 clusters; removing updates to 5/3; requiring verified historical availability to 2/2; excluding overlap with another active flow episode leaves 1 clean pre-onset record in 1 cluster.
+- These outputs are in `gate_policy_sensitivity.csv` and `naive_vs_evidence_gated_ablation.csv`.
+
 ## Physical-flow sensitivity and selectivity
 
 - 216 outcome specifications were evaluated.
