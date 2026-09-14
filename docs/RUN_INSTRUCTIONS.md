@@ -90,6 +90,3 @@ The expected `outputs/reports/evidence_coverage_gate.json` status is `blocked`, 
 
 `flow_sensitivity_results_for_manuscript.md` should report 216 specifications, E051 detected in 216/216, and 108/108 50%-90% threshold specifications with the major-to-catastrophic transition on 2026-03-01.
 
-## Manuscript
-
-Use `manuscript/RiskSignal_ICASF_2027_FINAL.md`. It is aligned to the blocked gate and does not reuse the legacy classifier's fusion/calibration claims.
