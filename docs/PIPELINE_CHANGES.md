@@ -2,7 +2,7 @@
 
 ## Scope
 
-This update is a conservative overlay on `RiskSignal_Public_Data_Pipeline_Phase4_v1.0.3.zip`. It converts the human-reviewed workbook into pipeline metadata and makes historical-warning eligibility an explicit gate. It does **not** add or recollect evidence.
+This update is a conservative overlay on `RiskSignal_Public_Data_Pipeline_Phase4_v1.0.3.zip`. It converts the reviewed workbook into pipeline metadata and makes historical-warning eligibility an explicit gate. It does **not** add or recollect evidence.
 
 ## Metadata changes
 

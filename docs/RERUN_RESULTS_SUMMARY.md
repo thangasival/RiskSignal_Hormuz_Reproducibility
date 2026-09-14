@@ -4,7 +4,7 @@
 
 - Pipeline metadata rows: **291**
 - Preserved prior metadata rows: **203**
-- Newly human-adjudicated mappings: **88**
+- Newly adjudicated mappings: **88**
 - Physical local evidence rows: **247**
 - Metadata-reference-only rows: **44**
 - Unresolved positive/update historical-warning mappings kept ineligible: **11**
