@@ -66,14 +66,6 @@ Attempting `python run_pipeline.py --steps phase4_registry` without the local ev
 
 The evidence-review layer covers public material from MARAD, UKMTO warnings/advisories, Joint War Committee/Lloyd's Market Association material, and Gard maritime-risk communications. The physical-flow sensitivity analysis uses a derived snapshot originating from IMF PortWatch Strait of Hormuz chokepoint telemetry. Third-party source documents remain subject to their original providers' terms and are not licensed by this repository.
 
-## Human review and historical-warning eligibility
-
-Human adjudication is authoritative in the released metadata. The 11 unresolved mappings are retained for auditability but carry an ineligible historical-warning claim status. Do not reinterpret them as verified pre-onset warning evidence.
-
-## Double-blind review warning
-
-If the conference submission remains under double-blind review, keep any author-identifying GitHub/Zenodo repository **private** or use an approved anonymous repository mechanism. Do not expose author identities through repository ownership or Zenodo creator metadata before the venue permits it.
-
 ## Licensing
 
 - Code: MIT License (`LICENSE`).
