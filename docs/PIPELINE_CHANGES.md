@@ -49,3 +49,7 @@ Separate exports preserve the workbook review layers:
 - No unresolved date or historical-availability field was imputed.
 
 See `PHASE4_REVIEWED_PIPELINE_CHANGES.patch` for the exact source diff.
+
+## Flow-sensitivity revision
+
+`evaluate_flow_sensitivity.py` now writes `pre2024_background_selectivity.csv` from the existing 2019–2023 baseline period. This characterizes detected episodes/year and episode-active-day fraction for every one of the 216 rules. It also distinguishes universal capture of the 1 March anchor from a separately identifiable target-local onset. `make_flow_sensitivity_figures.py` produces the two paper figures using these revised semantics. No new evidence or network data are collected.

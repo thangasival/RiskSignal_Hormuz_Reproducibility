@@ -1,5 +1,5 @@
 {
-  "title": "Explainable AI for Energy-Supply Resilience at the Strait of Hormuz: Fusing Maritime Advisories, Insurance Signals, and Public Telemetry",
+  "title": "Evidence-Gated AI Evaluation for Energy-Supply Resilience at the Strait of Hormuz",
   "rerun_mode": "offline_existing_data_only",
   "evidence_gate": "blocked",
   "registered_metadata_rows": 291,
@@ -11,10 +11,18 @@
   "direct_source_classes": 5,
   "fusion_metrics_calculated": false,
   "flow_sensitivity_specifications": 216,
-  "target_detected_specifications": 216,
-  "major_to_catastrophic_transition_date": "2026-03-01",
+  "target_anchor_interval_capture_specifications": 216,
+  "target_local_onset_specifications": 213,
+  "low_threshold_merged_specifications": 3,
   "major_threshold_specifications_invariant": 108,
-  "e051_escalation_signal_date": "2026-02-28",
-  "e051_escalation_lead_days": 1,
-  "initial_degradation_date_canonical": "2026-02-26"
+  "major_to_catastrophic_transition_date": "2026-03-01",
+  "initial_degradation_date_canonical": "2026-02-26",
+  "e051_marad_effective_date": "2026-02-28",
+  "e051_ukmto_issue_date": "2026-02-28",
+  "daily_observation_intervals_before_escalation": 1,
+  "pre2024_background_episode_rate_median": {
+    "50_percent": 1.6001861993,
+    "70_percent": 0.4000465498,
+    "90_percent": 0.0
+  }
 }

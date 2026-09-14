@@ -88,5 +88,6 @@ The expected `outputs/reports/evidence_coverage_gate.json` status is `blocked`, 
 
 ## Expected flow-sensitivity result
 
-`flow_sensitivity_results_for_manuscript.md` should report 216 specifications, E051 detected in 216/216, and 108/108 50%-90% threshold specifications with the major-to-catastrophic transition on 2026-03-01.
+`flow_sensitivity_results_for_manuscript.md` should report 216/216 anchor-interval captures, 213/216 target-local onsets, three low-threshold mergers, and 108/108 specifications at 50%-90% with onset on 2026-03-01. `pre2024_background_selectivity.csv` should also be regenerated.
+
 

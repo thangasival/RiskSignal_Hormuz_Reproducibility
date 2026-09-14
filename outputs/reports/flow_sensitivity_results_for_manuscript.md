@@ -3,23 +3,23 @@
 ## Completed checks
 
 - **216** outcome specifications: 4 training-only baselines, 6 shortfall thresholds, 3 persistence rules and 3 recovery rules.
-- The target disruption was detected in **216/216** specifications.
+- The 1 March target anchor falls inside a detected disruption interval in **216/216** specifications. A target-local onset (26 February or 1 March) is identified in **213/216**; **3** low-threshold specifications merge the target with a preceding episode.
 - All **108/108** specifications with 50%–90% shortfall thresholds place major-to-catastrophic onset on **1 March 2026**.
+- Pre-2024 selectivity improves sharply with severity: median background episode rates are **1.6/year at 50%**, **0.4/year at 70%**, and **0.0/year at 90%** across the corresponding 36 configurations per threshold. These are background detections, not labeled false positives, because the training period can contain real disruptions.
 - The canonical 30%/two-day definition identifies early degradation on **26 February 2026**; requiring three or five consecutive days moves this stage to **1 March 2026**.
 - Automated single-change-point dates are: **n_total=2026-03-02, n_tanker=2026-03-01, capacity=2026-03-02, capacity_tanker=2026-03-02**.
-- MARAD and UKMTO contribute **two signal families on 28 February**, one day before the major/catastrophic stage. This is escalation lead time after initial degradation, not clean lead time before all disruption.
-- E051 ranks first among 51 episodes on duration, severe days, cumulative tanker-capacity loss and maximum shortfall. The descriptive finite-sample empirical tail probability is **1/51 = 0.0196** for each metric; this is a rank statistic, not a causal p-value.
+- A MARAD record (effective date) and a UKMTO advisory (issue date) are dated **28 February**, one daily observation interval before the major/catastrophic stage. This is case-specific escalation timing after initial degradation, not clean lead before all disruption.
+- Under the canonical episode definition, E051 ranks first among 51 episodes on cumulative tanker-capacity loss and also ranks first on duration, severe days and maximum shortfall. These correlated ranks are descriptive only.
 
 ## Defensible claim
 
-Across 108 training-only baseline and persistence/recovery specifications with 50%–90% shortfall thresholds, the major-disruption transition is invariant at 1 March 2026. Two independently issued MARAD and UKMTO signal families dated 28 February provide one day of lead time for this escalation from early degradation to near-total flow collapse.
+Across 108 training-only baseline and persistence/recovery specifications with 50%–90% shortfall thresholds, the major-disruption transition is invariant at 1 March 2026. MARAD and UKMTO records dated 28 February precede this escalation by one daily observation interval, after the canonical initial degradation has already begun.
 
 ## Claims that remain unsupported
 
 - That the signals anticipated the initial 26 February degradation.
 - That insurance signals provided pre-escalation lead time.
 - That one-day escalation lead generalizes beyond E051.
-- That the legacy Brent-stress classifier predicts physical disruption.
 
 ## Required limitation
 

@@ -26,66 +26,86 @@ def make_figures(config_path: str | Path | None = None) -> tuple[Path, Path]:
     report_dir = root / "outputs" / "reports"
     figure_dir = root / "outputs" / "figures"
     sensitivity_path = report_dir / "flow_outcome_sensitivity.csv"
-    multistage_path = report_dir / "e051_multistage_timeline.csv"
+    background_path = report_dir / "pre2024_background_selectivity.csv"
     registry_path = _resolve(root, cfg.get("evidence_registry_file", "outputs/reports/e051_evidence_registry.csv"))
-    for path in [sensitivity_path, multistage_path, registry_path]:
+    for path in [sensitivity_path, background_path, registry_path]:
         if not path.exists():
             raise FileNotFoundError(f"Missing {path}; run flow_sensitivity first")
 
-    sensitivity = pd.read_csv(sensitivity_path)
-    grouped = (
-        sensitivity.groupby(["severe_shortfall_threshold", "minimum_consecutive_days"])
+    sensitivity = pd.read_csv(sensitivity_path, parse_dates=["target_onset_date"])
+    background = pd.read_csv(background_path)
+
+    # Figure 1: threshold selectivity + target-onset sensitivity.
+    selectivity = (
+        background.groupby("severe_shortfall_threshold")
         .agg(
-            median_episode_count=("total_episode_count", "median"),
-            median_onset_offset=("target_onset_offset_days", "median"),
-            onset_offset_low=("target_onset_offset_days", "min"),
-            onset_offset_high=("target_onset_offset_days", "max"),
+            median_rate=("background_episodes_per_year", "median"),
+            minimum_rate=("background_episodes_per_year", "min"),
+            maximum_rate=("background_episodes_per_year", "max"),
         )
         .reset_index()
     )
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4))
-    colors = {2: "#2f6690", 3: "#3a7d44", 5: "#b85c38"}
-    for minimum_days, group in grouped.groupby("minimum_consecutive_days"):
-        group = group.sort_values("severe_shortfall_threshold")
-        label = f"{minimum_days} consecutive days"
-        axes[0].plot(
-            group["severe_shortfall_threshold"] * 100,
-            group["median_episode_count"],
-            marker="o", label=label, color=colors.get(int(minimum_days)),
+    onset = sensitivity.loc[sensitivity["severe_shortfall_threshold"].ge(0.30)].copy()
+    onset_summary = (
+        onset.groupby(["severe_shortfall_threshold", "minimum_consecutive_days"])
+        .agg(
+            median_offset=("target_onset_offset_days", "median"),
+            min_offset=("target_onset_offset_days", "min"),
+            max_offset=("target_onset_offset_days", "max"),
+            specifications=("baseline_id", "size"),
         )
-        onset_group = group.loc[group["severe_shortfall_threshold"].ge(0.30)]
-        axes[1].plot(
-            onset_group["severe_shortfall_threshold"] * 100,
-            onset_group["median_onset_offset"],
-            marker="o", label=label, color=colors.get(int(minimum_days)),
-        )
-        axes[1].fill_between(
-            onset_group["severe_shortfall_threshold"] * 100,
-            onset_group["onset_offset_low"], onset_group["onset_offset_high"],
-            color=colors.get(int(minimum_days)), alpha=0.12,
-        )
-    axes[0].set_title("Episode count varies with outcome definition")
-    axes[0].set_ylabel("Median number of episodes")
-    axes[1].set_title("E051 onset shifts at stricter thresholds")
-    axes[1].set_ylabel("Days after 26 February 2026")
-    axes[1].axhline(0, color="#555555", linestyle="--", linewidth=1)
-    axes[1].text(
-        0.02, 0.96,
-        "20% omitted: some rules merge the target with a prior episode",
-        transform=axes[1].transAxes, va="top", fontsize=8, color="#555555",
-        bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.8, "pad": 2},
+        .reset_index()
     )
-    for axis in axes:
-        axis.set_xlabel("Severe shortfall threshold (%)")
-        axis.grid(alpha=0.2)
-        axis.spines[["top", "right"]].set_visible(False)
-        axis.legend(frameon=False, fontsize=8)
-    fig.suptitle("Physical-flow outcome sensitivity across training-only baselines and recovery rules", fontsize=12)
+
+    fig, axes = plt.subplots(1, 2, figsize=(10.8, 4.2))
+    x = selectivity["severe_shortfall_threshold"].to_numpy() * 100
+    y = selectivity["median_rate"].to_numpy()
+    low = y - selectivity["minimum_rate"].to_numpy()
+    high = selectivity["maximum_rate"].to_numpy() - y
+    axes[0].errorbar(x, y, yerr=[low, high], marker="o", capsize=3, linewidth=1.5)
+    axes[0].set_title("Pre-2024 background selectivity")
+    axes[0].set_xlabel("Shortfall threshold (%)")
+    axes[0].set_ylabel("Detected episodes per year\nmedian [min-max] across rules")
+    for threshold in [50, 70, 90]:
+        row = selectivity.loc[np.isclose(selectivity["severe_shortfall_threshold"] * 100, threshold)].iloc[0]
+        axes[0].annotate(
+            f"{row['median_rate']:.1f}/yr",
+            (threshold, row["median_rate"]),
+            xytext=(0, 8), textcoords="offset points", ha="center", fontsize=8,
+        )
+
+    offsets = {2: -1.3, 3: 0.0, 5: 1.3}
+    markers = {2: "o", 3: "s", 5: "^"}
+    for minimum_days, group in onset_summary.groupby("minimum_consecutive_days"):
+        group = group.sort_values("severe_shortfall_threshold")
+        gx = group["severe_shortfall_threshold"].to_numpy() * 100 + offsets[int(minimum_days)]
+        gy = group["median_offset"].to_numpy()
+        ylow = gy - group["min_offset"].to_numpy()
+        yhigh = group["max_offset"].to_numpy() - gy
+        axes[1].errorbar(
+            gx, gy, yerr=[ylow, yhigh], marker=markers[int(minimum_days)],
+            capsize=3, linestyle="-", linewidth=1.2,
+            label=f"{int(minimum_days)}-day persistence",
+        )
+    axes[1].axhline(0, linestyle="--", linewidth=1)
+    axes[1].axhline(3, linestyle=":", linewidth=1)
+    axes[1].text(91, 3.12, "1 Mar", fontsize=8, ha="right")
+    axes[1].text(91, 0.12, "26 Feb", fontsize=8, ha="right")
+    axes[1].set_title("E051 target-local onset range")
+    axes[1].set_xlabel("Shortfall threshold (%)")
+    axes[1].set_ylabel("Days after 26 February 2026")
+    axes[1].legend(frameon=False, fontsize=8, loc="best")
+
+    for ax in axes:
+        ax.grid(alpha=0.2)
+        ax.spines[["top", "right"]].set_visible(False)
+    fig.suptitle("Outcome selectivity and E051 onset sensitivity", fontsize=12)
     fig.tight_layout()
-    sensitivity_figure = figure_dir / "figure_5_flow_outcome_sensitivity.png"
+    sensitivity_figure = figure_dir / "figure_1_flow_selectivity_and_sensitivity.png"
     fig.savefig(sensitivity_figure, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
+    # Figure 2: E051 multistage timing at daily resolution.
     primary = _resolve(root, cfg.get("source_file", "data/raw/portwatch_hormuz_daily.csv"))
     fallback = _resolve(root, cfg.get("fallback_source_file", "data/processed/hormuz_flow_outcomes.csv"))
     source = primary if primary.exists() else fallback
@@ -99,46 +119,63 @@ def make_figures(config_path: str | Path | None = None) -> tuple[Path, Path]:
     )
     observed = pd.to_numeric(frame[observed_column], errors="coerce")
     frame["shortfall"] = np.maximum(0.0, expected - observed) / expected.replace(0, np.nan)
-    view = frame.loc[frame["date"].between("2026-01-27", "2026-03-15")].copy()
-    registry = pd.read_csv(registry_path)
-    signals = registry.loc[
-        registry["is_analytic_signal"].astype(str).str.lower().eq("true")
-        & registry["is_primary_representation"].astype(str).str.lower().eq("true")
-        & registry["evidence_date"].notna()
-    ].copy()
-    signals["evidence_date"] = pd.to_datetime(signals["evidence_date"])
-    signals = signals.sort_values(["evidence_date", "update_number"]).drop_duplicates("signal_family_id")
-    signals = signals.loc[signals["evidence_date"].between("2026-01-27", "2026-03-15")]
+    view = frame.loc[frame["date"].between("2026-01-27", "2026-03-07")].copy()
 
-    fig, ax = plt.subplots(figsize=(11, 5.2))
-    ax.plot(view["date"], view["shortfall"] * 100, color="#203864", linewidth=2, label="Tanker-capacity shortfall")
-    for threshold, color in [(30, "#6aa84f"), (50, "#f1c232"), (70, "#e69138"), (90, "#cc0000")]:
-        ax.axhline(threshold, color=color, linestyle=":" if threshold < 90 else "--", linewidth=1, alpha=0.8)
-        ax.text(view["date"].min(), threshold + 1.2, f"{threshold}%", color=color, fontsize=8)
-    ax.axvline(pd.Timestamp("2026-02-26"), color="#111111", linewidth=1.5, label="Early degradation onset")
-    ax.axvline(pd.Timestamp("2026-03-01"), color="#b22222", linewidth=1.5, label="Catastrophic-stage onset")
-    source_colors = {"UKMTO": "#1f77b4", "MARAD": "#ff7f0e", "Gard": "#2ca02c", "IUA-JWC/LMA": "#9467bd", "UKMTO-JMIC": "#8c564b"}
-    seen: set[str] = set()
-    for date, group in signals.groupby("evidence_date"):
-        for index, (_, signal) in enumerate(group.iterrows()):
-            source_name = str(signal["source"])
-            label = f"{source_name} signal" if source_name not in seen else None
-            seen.add(source_name)
-            ax.scatter(date, 104 + index * 2.2, s=42, color=source_colors.get(source_name, "#555555"), label=label, zorder=5)
+    registry = pd.read_csv(registry_path)
+    registry["evidence_date"] = pd.to_datetime(registry["evidence_date"], errors="coerce")
+    stage_signals = registry.loc[
+        registry["signal_family_id"].isin(["MARAD-2026-001A", "UKMTO-ADVISORY-003-26"])
+        & registry["is_primary_representation"].astype(str).str.lower().eq("true")
+    ].sort_values("evidence_date").drop_duplicates("signal_family_id")
+    overlap = registry.loc[
+        registry["signal_family_id"].eq("UKMTO-ADVISORY-001-26")
+        & registry["is_primary_representation"].astype(str).str.lower().eq("true")
+    ].sort_values("evidence_date").head(1)
+
+    fig, ax = plt.subplots(figsize=(10.6, 4.7))
+    ax.plot(view["date"], view["shortfall"] * 100, linewidth=2)
+    for threshold in [30, 50, 70, 90]:
+        ax.axhline(threshold, linestyle=":" if threshold < 90 else "--", linewidth=1, alpha=0.75)
+        ax.text(view["date"].min(), threshold + 1.3, f"{threshold}%", fontsize=8)
+    ax.axvline(pd.Timestamp("2026-02-26"), linewidth=1.4, linestyle="--")
+    ax.axvline(pd.Timestamp("2026-03-01"), linewidth=1.4, linestyle="-.")
+    ax.annotate("Initial degradation\n26 Feb", (pd.Timestamp("2026-02-26"), 92),
+                xytext=(-7, 0), textcoords="offset points", ha="right", va="center", fontsize=8)
+    ax.annotate("Major/catastrophic stage\n1 Mar", (pd.Timestamp("2026-03-01"), 92),
+                xytext=(7, 0), textcoords="offset points", ha="left", va="center", fontsize=8)
+
+    # Documentary dates are shown directly rather than through a crowded legend.
+    for signal in stage_signals.itertuples(index=False):
+        if signal.source == "MARAD":
+            ax.scatter(signal.evidence_date, 105, s=54, marker="o", zorder=5)
+            ax.annotate("MARAD effective date\n28 Feb", (signal.evidence_date, 105),
+                        xytext=(-10, 6), textcoords="offset points", ha="right", va="bottom", fontsize=7.5)
+        else:
+            ax.scatter(signal.evidence_date, 109, s=54, marker="s", zorder=5)
+            ax.annotate("UKMTO issue date\n28 Feb", (signal.evidence_date, 109),
+                        xytext=(10, 0), textcoords="offset points", ha="left", va="center", fontsize=7.5)
+    if not overlap.empty:
+        row = overlap.iloc[0]
+        ax.scatter(row["evidence_date"], 104, s=48, marker="x", zorder=5)
+        ax.annotate(
+            "3 Feb UKMTO: contextual overlap with E050;\nnot a clean E051 warning",
+            (row["evidence_date"], 104), xytext=(8, -1), textcoords="offset points",
+            fontsize=7.4, va="center",
+        )
+
     ax.set_ylim(0, 114)
     ax.set_ylabel("Estimated tanker-capacity shortfall (%)")
     ax.set_xlabel("Date")
-    ax.set_title("E051 exhibits an early-degradation stage followed by near-total collapse")
-    ax.xaxis.set_major_locator(mdates.DayLocator(interval=7))
+    ax.set_title("E051: stage timing and documentary dates at daily resolution")
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=5))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%d %b"))
     ax.grid(alpha=0.2)
     ax.spines[["top", "right"]].set_visible(False)
-    ax.legend(frameon=False, fontsize=8, ncol=3, loc="upper left")
-    fig.autofmt_xdate(rotation=0)
     fig.tight_layout()
-    multistage_figure = figure_dir / "figure_6_e051_multistage_outcome.png"
+    multistage_figure = figure_dir / "figure_2_e051_multistage_timing.png"
     fig.savefig(multistage_figure, dpi=300, bbox_inches="tight")
     plt.close(fig)
+
     print(f"Wrote {sensitivity_figure}")
     print(f"Wrote {multistage_figure}")
     return sensitivity_figure, multistage_figure

@@ -238,6 +238,48 @@ def evaluate(config_path: str | Path | None = None) -> dict[str, Path]:
             sensitivity_rows.append(row)
 
     sensitivity = pd.DataFrame(sensitivity_rows)
+
+    # Characterize background selectivity on the same training-only period used
+    # to estimate the outcome baselines. These counts are not labeled as false
+    # positives because the historical interval may contain genuine disruptions;
+    # they quantify how often each rule fires away from the target case.
+    training_mask = frame["date"].le(pd.Timestamp(baseline_end))
+    training_days = int(training_mask.sum())
+    training_years = training_days / 365.2425
+    background_rows: list[dict[str, Any]] = []
+    for baseline_id, shortfall in cached_shortfalls.items():
+        expected = cached_expected[baseline_id]
+        loss = np.maximum(0.0, expected - observed)
+        training_frame = frame.loc[training_mask].copy().reset_index(drop=True)
+        training_frame["capacity_loss"] = pd.Series(loss, index=frame.index).loc[training_mask].to_numpy()
+        training_shortfall = shortfall.loc[training_mask].reset_index(drop=True)
+        for threshold, minimum_run, recovery in itertools.product(thresholds, minimum_runs, recovery_values):
+            episodes, ids, _ = _episode_table(
+                training_frame,
+                training_shortfall,
+                threshold=threshold,
+                minimum_consecutive_days=minimum_run,
+                recovery_days=recovery,
+            )
+            background_rows.append({
+                "baseline_id": baseline_id,
+                "severe_shortfall_threshold": threshold,
+                "minimum_consecutive_days": minimum_run,
+                "recovery_days": recovery,
+                "training_start_date": training_frame["date"].min(),
+                "training_end_date": training_frame["date"].max(),
+                "training_days": training_days,
+                "background_episode_count": int(len(episodes)),
+                "background_episodes_per_year": float(len(episodes) / training_years),
+                "raw_threshold_days": int(training_shortfall.ge(threshold).sum()),
+                "raw_threshold_day_fraction": float(training_shortfall.ge(threshold).mean()),
+                "episode_active_days": int(pd.Series(ids).gt(0).sum()),
+                "episode_active_day_fraction": float(pd.Series(ids).gt(0).mean()),
+                "mean_episode_duration_days": float(episodes["duration_days"].mean()) if not episodes.empty else 0.0,
+                "median_episode_duration_days": float(episodes["duration_days"].median()) if not episodes.empty else 0.0,
+            })
+    background = pd.DataFrame(background_rows)
+
     stability = (
         sensitivity.groupby(["severe_shortfall_threshold", "minimum_consecutive_days"])
         .agg(
@@ -402,6 +444,7 @@ def evaluate(config_path: str | Path | None = None) -> dict[str, Path]:
     report_dir = root / "outputs" / "reports"
     paths = {
         "sensitivity": report_dir / "flow_outcome_sensitivity.csv",
+        "background_selectivity": report_dir / "pre2024_background_selectivity.csv",
         "stability": report_dir / "episode_stability_matrix.csv",
         "multistage": report_dir / "e051_multistage_timeline.csv",
         "diagnostics": report_dir / "e051_flow_data_diagnostics.json",
@@ -409,12 +452,25 @@ def evaluate(config_path: str | Path | None = None) -> dict[str, Path]:
         "manuscript_summary": report_dir / "flow_sensitivity_results_for_manuscript.md",
     }
     sensitivity.to_csv(paths["sensitivity"], index=False, date_format="%Y-%m-%d")
+    background.to_csv(paths["background_selectivity"], index=False, date_format="%Y-%m-%d")
     stability.to_csv(paths["stability"], index=False, date_format="%Y-%m-%d")
     multistage.to_csv(paths["multistage"], index=False, date_format="%Y-%m-%d")
     write_json(diagnostics, paths["diagnostics"])
     placebo.to_csv(paths["placebo"], index=False)
     strict = sensitivity.loc[sensitivity["severe_shortfall_threshold"].ge(0.50)]
     strict_march_first = strict["target_onset_date"].astype(str).eq("2026-03-01")
+    merged_target = sensitivity.loc[pd.to_datetime(sensitivity["target_onset_date"]) < canonical_onset]
+    target_local = sensitivity.loc[pd.to_datetime(sensitivity["target_onset_date"]) >= canonical_onset]
+    background_summary = (
+        background.loc[background["severe_shortfall_threshold"].ge(0.50)]
+        .groupby("severe_shortfall_threshold")
+        .agg(
+            median_episodes_per_year=("background_episodes_per_year", "median"),
+            minimum_episodes_per_year=("background_episodes_per_year", "min"),
+            maximum_episodes_per_year=("background_episodes_per_year", "max"),
+            median_active_day_fraction=("episode_active_day_fraction", "median"),
+        )
+    )
     change_dates = ", ".join(
         f"{item['column']}={item['detected_change_date']}" for item in change_points
     )
@@ -423,23 +479,23 @@ def evaluate(config_path: str | Path | None = None) -> dict[str, Path]:
 ## Completed checks
 
 - **{len(sensitivity)}** outcome specifications: {len(baseline_variants)} training-only baselines, {len(thresholds)} shortfall thresholds, {len(minimum_runs)} persistence rules and {len(recovery_values)} recovery rules.
-- The target disruption was detected in **{int(sensitivity['target_episode_detected'].sum())}/{len(sensitivity)}** specifications.
+- The 1 March target anchor falls inside a detected disruption interval in **{int(sensitivity['target_episode_detected'].sum())}/{len(sensitivity)}** specifications. A target-local onset (26 February or 1 March) is identified in **{len(target_local)}/{len(sensitivity)}**; **{len(merged_target)}** low-threshold specifications merge the target with a preceding episode.
 - All **{int(strict_march_first.sum())}/{len(strict)}** specifications with 50%–90% shortfall thresholds place major-to-catastrophic onset on **1 March 2026**.
+- Pre-2024 selectivity improves sharply with severity: median background episode rates are **{background_summary.loc[0.50, 'median_episodes_per_year']:.1f}/year at 50%**, **{background_summary.loc[0.70, 'median_episodes_per_year']:.1f}/year at 70%**, and **{background_summary.loc[0.90, 'median_episodes_per_year']:.1f}/year at 90%** across the corresponding 36 configurations per threshold. These are background detections, not labeled false positives, because the training period can contain real disruptions.
 - The canonical 30%/two-day definition identifies early degradation on **26 February 2026**; requiring three or five consecutive days moves this stage to **1 March 2026**.
 - Automated single-change-point dates are: **{change_dates}**.
-- MARAD and UKMTO contribute **two signal families on 28 February**, one day before the major/catastrophic stage. This is escalation lead time after initial degradation, not clean lead time before all disruption.
-- E051 ranks first among 51 episodes on duration, severe days, cumulative tanker-capacity loss and maximum shortfall. The descriptive finite-sample empirical tail probability is **1/51 = 0.0196** for each metric; this is a rank statistic, not a causal p-value.
+- A MARAD record (effective date) and a UKMTO advisory (issue date) are dated **28 February**, one daily observation interval before the major/catastrophic stage. This is case-specific escalation timing after initial degradation, not clean lead before all disruption.
+- Under the canonical episode definition, E051 ranks first among 51 episodes on cumulative tanker-capacity loss and also ranks first on duration, severe days and maximum shortfall. These correlated ranks are descriptive only.
 
 ## Defensible claim
 
-Across 108 training-only baseline and persistence/recovery specifications with 50%–90% shortfall thresholds, the major-disruption transition is invariant at 1 March 2026. Two independently issued MARAD and UKMTO signal families dated 28 February provide one day of lead time for this escalation from early degradation to near-total flow collapse.
+Across 108 training-only baseline and persistence/recovery specifications with 50%–90% shortfall thresholds, the major-disruption transition is invariant at 1 March 2026. MARAD and UKMTO records dated 28 February precede this escalation by one daily observation interval, after the canonical initial degradation has already begun.
 
 ## Claims that remain unsupported
 
 - That the signals anticipated the initial 26 February degradation.
 - That insurance signals provided pre-escalation lead time.
 - That one-day escalation lead generalizes beyond E051.
-- That the legacy Brent-stress classifier predicts physical disruption.
 
 ## Required limitation
 
