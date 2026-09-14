@@ -1,0 +1,13 @@
+{
+  "gate_observed": {
+    "direct_source_classes": 5,
+    "eligible_independent_clusters": 3,
+    "eligible_test_clusters": 3,
+    "metadata_reference_only_rows": 44,
+    "physical_evidence_rows": 247,
+    "registered_evidence_rows": 291,
+    "unresolved_historical_warning_mappings": 11
+  },
+  "reason": "Evidence-coverage gate has not passed; no fusion-performance claim was calculated.",
+  "status": "blocked"
+}

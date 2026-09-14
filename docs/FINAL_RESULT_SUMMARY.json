@@ -1,0 +1,20 @@
+{
+  "title": "Explainable AI for Energy-Supply Resilience at the Strait of Hormuz: Fusing Maritime Advisories, Insurance Signals, and Public Telemetry",
+  "rerun_mode": "offline_existing_data_only",
+  "evidence_gate": "blocked",
+  "registered_metadata_rows": 291,
+  "physical_evidence_rows": 247,
+  "metadata_reference_only_rows": 44,
+  "unresolved_historical_warning_mappings": 11,
+  "eligible_independent_clusters": 3,
+  "eligible_test_clusters": 3,
+  "direct_source_classes": 5,
+  "fusion_metrics_calculated": false,
+  "flow_sensitivity_specifications": 216,
+  "target_detected_specifications": 216,
+  "major_to_catastrophic_transition_date": "2026-03-01",
+  "major_threshold_specifications_invariant": 108,
+  "e051_escalation_signal_date": "2026-02-28",
+  "e051_escalation_lead_days": 1,
+  "initial_degradation_date_canonical": "2026-02-26"
+}

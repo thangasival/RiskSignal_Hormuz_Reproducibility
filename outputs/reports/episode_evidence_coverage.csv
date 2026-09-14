@@ -1,0 +1,12 @@
+episode_cluster_id,phase4_split,dependency_group,total_collection_tasks,completed_collection_tasks,required_coverage_units,completed_required_units,required_coverage_fraction,positive_signal_families,clean_pre_onset_families,unresolved_metadata_rows,double_coding_issues,historical_warning_eligibility_issues,episode_complete
+E006,training,E006,10,0,8,0,0.0,0,0,0,0,2,False
+E007,training,E007,10,0,8,0,0.0,0,0,0,0,2,False
+E027,training,E027,10,0,8,0,0.0,0,0,0,0,2,False
+E029,training,E029,10,0,8,0,0.0,0,0,0,0,1,False
+E031,validation,E031,10,1,8,1,0.125,3,0,0,0,4,False
+E032,validation,E032,10,0,8,0,0.0,0,0,0,0,0,False
+E038,test,E038,10,10,8,8,1.0,1,0,0,0,0,True
+E042,test,E042,10,10,8,8,1.0,0,0,0,0,0,True
+E045,test,E045,10,10,8,8,1.0,1,1,0,0,0,True
+E047,test,E047,10,0,8,0,0.0,0,0,0,0,0,False
+E051,test,E051,10,8,8,7,0.875,25,0,0,0,0,False

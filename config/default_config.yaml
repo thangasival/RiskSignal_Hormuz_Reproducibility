@@ -1,0 +1,53 @@
+project:
+  name: RiskSignal-AI Hormuz Public Data Pipeline
+  timezone: UTC
+flow_sensitivity:
+  source_file: data/raw/portwatch_hormuz_daily.csv
+  fallback_source_file: data/processed/hormuz_flow_outcomes.csv
+  canonical_episodes_file: outputs/reports/flow_episodes.csv
+  evidence_registry_file: outputs/reports/e051_evidence_registry.csv
+  target_anchor_date: '2026-03-01'
+  canonical_onset_date: '2026-02-26'
+  canonical_baseline: doy_weekday_hw15
+  canonical_seasonal_half_window_days: 15
+  canonical_minimum_consecutive_days: 2
+  canonical_recovery_days: 3
+  thresholds:
+  - 0.2
+  - 0.3
+  - 0.4
+  - 0.5
+  - 0.7
+  - 0.9
+  stage_thresholds:
+  - 0.3
+  - 0.4
+  - 0.5
+  - 0.7
+  - 0.9
+  seasonal_half_windows_days:
+  - 7
+  - 15
+  - 30
+  minimum_consecutive_days:
+  - 2
+  - 3
+  - 5
+  recovery_days:
+  - 3
+  - 5
+  - 7
+  diagnostic_pre_days: 30
+  change_point_start: '2026-01-01'
+  change_point_end: '2026-09-06'
+  change_point_minimum_segment_days: 14
+phase4:
+  manifest_file: data/manual/phase4_episode_manifest.csv
+  metadata_file: data/manual/phase4_evidence_metadata.csv
+  evidence_root: data/evidence/phase4
+  all_flow_episodes_file: outputs/reports/flow_episodes.csv
+  minimum_independent_clusters: 10
+  minimum_test_clusters: 3
+  minimum_episode_coverage: 0.9
+  bootstrap_replicates: 2000
+  bootstrap_seed: 42

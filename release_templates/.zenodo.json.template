@@ -1,0 +1,24 @@
+{
+  "title": "RiskSignal: Evidence-Gated Energy-Supply Resilience at the Strait of Hormuz",
+  "description": "Offline reproducibility release containing analysis code, human-reviewed metadata, provenance records, derived results, and figures. Third-party evidence documents are not redistributed. The Phase 4 evidence gate is blocked; no generalized fusion-performance or calibration claim is made.",
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "TODO: Family name, Given name",
+      "affiliation": "TODO",
+      "orcid": "TODO if applicable"
+    }
+  ],
+  "keywords": [
+    "Strait of Hormuz",
+    "energy supply resilience",
+    "maritime security",
+    "explainable AI",
+    "evidence gating",
+    "supply chain resilience",
+    "public telemetry"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "related_identifiers": []
+}

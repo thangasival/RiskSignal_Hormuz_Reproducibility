@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+data/evidence/
+private_evidence/
+*.pdf
+*.html
+*.mhtml
+*.har
+playwright-report/

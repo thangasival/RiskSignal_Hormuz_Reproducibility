@@ -1,0 +1,190 @@
+{
+  "duplicate_dates": 0,
+  "field_diagnostics": {
+    "capacity": {
+      "post_median": 85307.5,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.032117318428392674,
+      "post_zero_rate": 0.11052631578947368,
+      "pre_median": 2656121.5,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.0
+    },
+    "capacity_cargo": {
+      "post_median": 49601.5,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.0628850164497664,
+      "post_zero_rate": 0.20526315789473684,
+      "pre_median": 788765.0,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.0
+    },
+    "capacity_container": {
+      "post_median": 0.0,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.0,
+      "post_zero_rate": 0.6736842105263158,
+      "pre_median": 362546.5,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.0
+    },
+    "capacity_dry_bulk": {
+      "post_median": 39093.0,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.08758971992037094,
+      "post_zero_rate": 0.39473684210526316,
+      "pre_median": 446319.5,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.03333333333333333
+    },
+    "capacity_general_cargo": {
+      "post_median": 0.0,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.0,
+      "post_zero_rate": 0.5526315789473685,
+      "pre_median": 16320.0,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.03333333333333333
+    },
+    "capacity_roro": {
+      "post_median": 0.0,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.0,
+      "post_zero_rate": 0.9894736842105263,
+      "pre_median": 4621.0,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.2
+    },
+    "capacity_tanker": {
+      "post_median": 11040.5,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.00608159489213232,
+      "post_zero_rate": 0.3894736842105263,
+      "pre_median": 1815395.5,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.0
+    },
+    "n_cargo": {
+      "post_median": 3.0,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.09375,
+      "post_zero_rate": 0.12631578947368421,
+      "pre_median": 32.0,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.0
+    },
+    "n_container": {
+      "post_median": 0.0,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.0,
+      "post_zero_rate": 0.6368421052631579,
+      "pre_median": 11.0,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.0
+    },
+    "n_dry_bulk": {
+      "post_median": 1.5,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.12,
+      "post_zero_rate": 0.2736842105263158,
+      "pre_median": 12.5,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.0
+    },
+    "n_general_cargo": {
+      "post_median": 1.0,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.2,
+      "post_zero_rate": 0.42105263157894735,
+      "pre_median": 5.0,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.0
+    },
+    "n_roro": {
+      "post_median": 0.0,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.0,
+      "post_zero_rate": 0.968421052631579,
+      "pre_median": 2.5,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.03333333333333333
+    },
+    "n_tanker": {
+      "post_median": 2.0,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.05,
+      "post_zero_rate": 0.25263157894736843,
+      "pre_median": 40.0,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.0
+    },
+    "n_total": {
+      "post_median": 4.0,
+      "post_null_rate": 0.0,
+      "post_to_pre_median_ratio": 0.056338028169014086,
+      "post_zero_rate": 0.06315789473684211,
+      "pre_median": 71.0,
+      "pre_null_rate": 0.0,
+      "pre_zero_rate": 0.0
+    }
+  },
+  "first_date": "2019-01-01",
+  "interpretation_gate": {
+    "all_vessel_categories_shift": true,
+    "external_operational_corroboration_present": true,
+    "portwatch_measurement_break_not_excluded": true,
+    "publication_status": "requires sensitivity reporting and explicit AIS-proxy limitation"
+  },
+  "last_date": "2026-09-06",
+  "missing_calendar_days": 0,
+  "observed_column": "capacity_tanker",
+  "post_window": [
+    "2026-03-01",
+    "2026-09-06"
+  ],
+  "pre_window": [
+    "2026-01-27",
+    "2026-02-25"
+  ],
+  "rows": 2806,
+  "single_change_point_checks": [
+    {
+      "column": "n_total",
+      "detected_change_date": "2026-03-02",
+      "log_scale_residual_sse": 127.2725071138682,
+      "minimum_segment_days": 14,
+      "post_median": 4.0,
+      "post_to_pre_median_ratio": 0.064,
+      "pre_median": 62.5
+    },
+    {
+      "column": "n_tanker",
+      "detected_change_date": "2026-03-01",
+      "log_scale_residual_sse": 124.45638055252483,
+      "minimum_segment_days": 14,
+      "post_median": 2.0,
+      "post_to_pre_median_ratio": 0.05714285714285714,
+      "pre_median": 35.0
+    },
+    {
+      "column": "capacity",
+      "detected_change_date": "2026-03-02",
+      "log_scale_residual_sse": 2913.9193756840914,
+      "minimum_segment_days": 14,
+      "post_median": 84095.0,
+      "post_to_pre_median_ratio": 0.03619790887613876,
+      "pre_median": 2323200.5
+    },
+    {
+      "column": "capacity_tanker",
+      "detected_change_date": "2026-03-02",
+      "log_scale_residual_sse": 5750.338353868065,
+      "minimum_segment_days": 14,
+      "post_median": 10939.0,
+      "post_to_pre_median_ratio": 0.006748880147995372,
+      "pre_median": 1620861.5
+    }
+  ],
+  "source_mode": "processed_fallback_with_original_fields",
+  "source_path": "data/processed/hormuz_flow_outcomes.csv"
+}

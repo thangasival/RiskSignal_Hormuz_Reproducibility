@@ -1,0 +1,31 @@
+Phase 4 evidence gate: blocked
+Wrote /mnt/data/risksignal_phase4/outputs/reports/multi_episode_evidence_registry.csv
+Wrote /mnt/data/risksignal_phase4/outputs/reports/episode_evidence_coverage.csv
+Wrote /mnt/data/risksignal_phase4/outputs/reports/evidence_coverage_gate.json
+Wrote /mnt/data/risksignal_phase4/outputs/reports/phase4_readiness_report.md
+Phase 4 evaluation blocked by evidence-coverage gate (expected before collection).
+Wrote /mnt/data/risksignal_phase4/outputs/figures/figure_7_phase4_evidence_coverage.png
+Wrote /mnt/data/risksignal_phase4/outputs/figures/figure_8_phase4_source_fusion_comparison.png
+Wrote /mnt/data/risksignal_phase4/outputs/reports/flow_outcome_sensitivity.csv
+Wrote /mnt/data/risksignal_phase4/outputs/reports/episode_stability_matrix.csv
+Wrote /mnt/data/risksignal_phase4/outputs/reports/e051_multistage_timeline.csv
+Wrote /mnt/data/risksignal_phase4/outputs/reports/e051_flow_data_diagnostics.json
+Wrote /mnt/data/risksignal_phase4/outputs/reports/e051_prior_episode_placebo_comparison.csv
+Wrote /mnt/data/risksignal_phase4/outputs/reports/flow_sensitivity_results_for_manuscript.md
+Wrote /mnt/data/risksignal_phase4/outputs/figures/figure_5_flow_outcome_sensitivity.png
+Wrote /mnt/data/risksignal_phase4/outputs/figures/figure_6_e051_multistage_outcome.png
+
+>>> /opt/pyvenv/bin/python -m risksignal.build_multi_episode_registry
+>>> local source: /mnt/data/risksignal_phase4/src
+
+>>> /opt/pyvenv/bin/python -m risksignal.evaluate_multi_episode
+>>> local source: /mnt/data/risksignal_phase4/src
+
+>>> /opt/pyvenv/bin/python -m risksignal.make_phase4_figures
+>>> local source: /mnt/data/risksignal_phase4/src
+
+>>> /opt/pyvenv/bin/python -m risksignal.evaluate_flow_sensitivity
+>>> local source: /mnt/data/risksignal_phase4/src
+
+>>> /opt/pyvenv/bin/python -m risksignal.make_flow_sensitivity_figures
+>>> local source: /mnt/data/risksignal_phase4/src

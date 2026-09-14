@@ -1,0 +1,25 @@
+{
+  "checks": {
+    "minimum_independent_episode_clusters": false,
+    "minimum_temporal_test_clusters": true,
+    "minimum_two_direct_source_classes": true,
+    "no_unresolved_historical_warning_mappings": false,
+    "no_unresolved_metadata_in_eligible_clusters": true
+  },
+  "interpretation": "Physical-onset fusion evaluation is authorized only when status is pass.",
+  "observed": {
+    "direct_source_classes": 5,
+    "eligible_independent_clusters": 3,
+    "eligible_test_clusters": 3,
+    "metadata_reference_only_rows": 44,
+    "physical_evidence_rows": 247,
+    "registered_evidence_rows": 291,
+    "unresolved_historical_warning_mappings": 11
+  },
+  "status": "blocked",
+  "thresholds": {
+    "minimum_episode_coverage": 0.9,
+    "minimum_independent_clusters": 10,
+    "minimum_test_clusters": 3
+  }
+}

@@ -1,0 +1,6 @@
+stage,shortfall_threshold,stage_detected,stage_onset_date,days_after_canonical_onset,stage_end_date,duration_days,pre_stage_signal_families_7d,escalation_signal_families_after_initial_onset,escalation_signal_sources,first_escalation_signal_date,maximum_escalation_lead_days,capacity_loss_first_7d,median_shortfall_first_7d
+early degradation,0.3,True,2026-02-26,0,2026-09-06,193,0,0,,,,10234168.623050962,0.9254956629330796
+severe degradation,0.4,True,2026-02-26,0,2026-09-06,193,0,0,,,,10234168.623050962,0.9254956629330796
+major disruption,0.5,True,2026-03-01,3,2026-09-06,190,2,2,MARAD; UKMTO,2026-02-28,1,14573843.312402297,1.0
+critical disruption,0.7,True,2026-03-01,3,2026-06-22,114,2,2,MARAD; UKMTO,2026-02-28,1,14573843.312402297,1.0
+catastrophic disruption,0.9,True,2026-03-01,3,2026-06-17,109,2,2,MARAD; UKMTO,2026-02-28,1,14573843.312402297,1.0

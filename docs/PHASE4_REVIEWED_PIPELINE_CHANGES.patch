@@ -1,0 +1,249 @@
+--- /mnt/data/original_v103/src/risksignal/build_multi_episode_registry.py	2026-09-14 19:29:23.194906654 +0000
++++ src/risksignal/build_multi_episode_registry.py	2026-09-14 19:26:10.542036132 +0000
+@@ -13,10 +13,13 @@
+ 
+ REGISTRY_COLUMNS = [
+     "task_id", "episode_cluster_id", "flow_episode_id", "phase4_split", "dependency_group",
+-    "relative_path", "sha256", "size_bytes", "source_class", "document_id", "signal_family_id",
+-    "document_role", "evidence_date", "issue_date", "publication_date", "effective_date",
+-    "expiry_date", "geographic_scope", "window_type", "is_zero_result_capture", "is_direct_official",
+-    "is_update", "parent_family_id", "reviewer_1", "reviewer_2", "adjudication_status", "notes",
++    "relative_path", "sha256", "size_bytes", "evidence_present", "evidence_storage_type",
++    "source_class", "document_id", "signal_family_id", "document_role", "evidence_date",
++    "issue_date", "publication_date", "effective_date", "expiry_date", "geographic_scope",
++    "window_type", "is_zero_result_capture", "is_direct_official", "is_update", "parent_family_id",
++    "reviewer_1", "reviewer_2", "adjudication_status", "notes", "review_origin", "review_id",
++    "evidence_id", "reviewer_1_decision", "reviewer_2_decision", "historical_availability_status",
++    "prior_episode_overlap_status", "review_action", "claim_eligibility_status",
+     "onset_date", "days_from_onset", "active_flow_episode_id", "clean_pre_onset_signal",
+     "independent_episode_unit",
+ ]
+@@ -24,7 +27,7 @@
+ COVERAGE_ROLES = {"positive_signal", "update", "zero_result_capture"}
+ AUDIT_ROLES_WITHOUT_SIGNAL = {
+     "archive_capture", "archive_capture_pending_classification", "methodology", "access_limitation",
+-    "candidate_document_pending_classification",
++    "candidate_document_pending_classification", "excluded",
+ }
+ 
+ 
+@@ -79,11 +82,10 @@
+             path.resolve().relative_to(evidence_root.resolve())
+         except ValueError as exc:
+             raise ValueError(f"Metadata row {index + 2} points outside the Phase 4 evidence root") from exc
+-        if not relative or not path.is_file():
+-            raise FileNotFoundError(f"Metadata row {index + 2} evidence file is missing: {relative}")
+-        if path.name == "PLACE_EVIDENCE_HERE.txt":
++        evidence_present = bool(relative and path.is_file())
++        if evidence_present and path.name == "PLACE_EVIDENCE_HERE.txt":
+             raise ValueError("Placeholder files cannot be registered as evidence")
+-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
++        digest = hashlib.sha256(path.read_bytes()).hexdigest() if evidence_present else ""
+         evidence_date = _best_date(row)
+         episode = manifest_index.loc[cluster]
+         onset = pd.Timestamp(episode["onset_date"]).normalize()
+@@ -93,14 +95,16 @@
+         family = str(row.get("signal_family_id", "")).strip()
+         role = str(row.get("document_role", "")).strip()
+         status = str(row.get("adjudication_status", "")).strip().lower()
+-        if not zero and not family and role not in AUDIT_ROLES_WITHOUT_SIGNAL:
+-            raise ValueError(f"Metadata row {index + 2} requires signal_family_id for a positive document")
+-        if not zero and role not in AUDIT_ROLES_WITHOUT_SIGNAL and evidence_date is None:
+-            raise ValueError(f"Metadata row {index + 2} requires issue/publication/effective date")
+-        if not zero and evidence_date is not None and role not in AUDIT_ROLES_WITHOUT_SIGNAL and not (
++        claim_eligibility = str(row.get("claim_eligibility_status", "")).strip().lower()
++        historical_warning_eligible = role in {"positive_signal", "update"} and claim_eligibility in {"eligible", "legacy_accepted"}
++        if historical_warning_eligible and not family:
++            raise ValueError(f"Metadata row {index + 2} requires signal_family_id for an eligible positive document")
++        if historical_warning_eligible and evidence_date is None:
++            raise ValueError(f"Metadata row {index + 2} requires issue/publication/effective date for an eligible claim")
++        if historical_warning_eligible and evidence_date is not None and not (
+             pd.Timestamp(task["date_from"]) <= evidence_date <= pd.Timestamp(task["date_to"])
+         ):
+-            raise ValueError(f"Metadata row {index + 2} signal date falls outside its fixed task window")
++            raise ValueError(f"Metadata row {index + 2} eligible signal date falls outside its fixed task window")
+         if update and not str(row.get("parent_family_id", "")).strip():
+             raise ValueError(f"Metadata row {index + 2} marks an update without parent_family_id")
+         active_flow_episode_id: int | None = None
+@@ -111,11 +115,14 @@
+             ]
+             if not active.empty:
+                 active_flow_episode_id = int(active.iloc[0]["flow_episode_id"])
++        overlap_status = str(row.get("prior_episode_overlap_status", "")).strip().lower()
++        overlap_clear = overlap_status in {"clear", "legacy_reviewed", "not_applicable", ""}
+         clean = bool(
+-            not zero and direct and not update and status == "accepted" and evidence_date is not None
++            evidence_present and historical_warning_eligible and not zero and direct and not update
++            and status == "accepted" and evidence_date is not None
+             and pd.Timestamp(task["date_from"]) <= evidence_date <= pd.Timestamp(task["date_to"])
+             and task["window_type"] == "pre_onset" and evidence_date < onset
+-            and active_flow_episode_id is None
++            and active_flow_episode_id is None and overlap_clear
+         )
+         records.append({
+             "task_id": task_id,
+@@ -125,7 +132,9 @@
+             "dependency_group": episode["dependency_group"],
+             "relative_path": relative,
+             "sha256": digest,
+-            "size_bytes": path.stat().st_size,
++            "size_bytes": path.stat().st_size if evidence_present else 0,
++            "evidence_present": evidence_present,
++            "evidence_storage_type": str(row.get("evidence_storage_type", "")).strip() or ("local_original" if evidence_present else "metadata_reference_only"),
+             "source_class": task["source_class"],
+             "document_id": str(row.get("document_id", "")).strip() or digest[:16],
+             "signal_family_id": family,
+@@ -145,6 +154,15 @@
+             "reviewer_2": str(row.get("reviewer_2", "")).strip(),
+             "adjudication_status": status,
+             "notes": str(row.get("notes", "")).strip(),
++            "review_origin": str(row.get("review_origin", "")).strip(),
++            "review_id": str(row.get("review_id", "")).strip(),
++            "evidence_id": str(row.get("evidence_id", "")).strip(),
++            "reviewer_1_decision": str(row.get("reviewer_1_decision", "")).strip(),
++            "reviewer_2_decision": str(row.get("reviewer_2_decision", "")).strip(),
++            "historical_availability_status": str(row.get("historical_availability_status", "")).strip(),
++            "prior_episode_overlap_status": str(row.get("prior_episode_overlap_status", "")).strip(),
++            "review_action": str(row.get("review_action", "")).strip(),
++            "claim_eligibility_status": str(row.get("claim_eligibility_status", "")).strip(),
+             "onset_date": onset,
+             "days_from_onset": None if evidence_date is None else int((evidence_date - onset).days),
+             "active_flow_episode_id": active_flow_episode_id,
+@@ -157,7 +175,8 @@
+ 
+ def coverage_table(manifest: pd.DataFrame, tasks: pd.DataFrame, registry: pd.DataFrame) -> pd.DataFrame:
+     accepted = registry.loc[
+-        registry["is_direct_official"]
++        registry["evidence_present"]
++        & registry["is_direct_official"]
+         & registry["adjudication_status"].isin(["accepted", "not_required"])
+         & registry["document_role"].isin(COVERAGE_ROLES)
+     ] if not registry.empty else registry
+@@ -179,10 +198,13 @@
+         clean_families = 0
+         unresolved = 0
+         double_coding_issues = 0
++        historical_warning_eligibility_issues = 0
+         if not registry.empty:
+             episode_records = registry.loc[registry["episode_cluster_id"].eq(episode.episode_cluster_id)]
+             positives = episode_records.loc[
+-                ~episode_records["is_zero_result_capture"]
++                episode_records["evidence_present"]
++                & episode_records["document_role"].eq("positive_signal")
++                & ~episode_records["is_zero_result_capture"]
+                 & ~episode_records["is_update"]
+                 & episode_records["adjudication_status"].eq("accepted")
+             ]
+@@ -201,6 +223,11 @@
+                 | positive_pre["reviewer_2"].eq("")
+                 | positive_pre["reviewer_1"].eq(positive_pre["reviewer_2"])
+             ).sum())
++            historical_warning_eligibility_issues = int((
++                episode_records["document_role"].isin(["positive_signal", "update"])
++                & episode_records["adjudication_status"].eq("accepted")
++                & ~episode_records["claim_eligibility_status"].str.lower().isin(["eligible", "legacy_accepted"])
++            ).sum())
+         rows.append({
+             "episode_cluster_id": episode.episode_cluster_id,
+             "phase4_split": episode.phase4_split,
+@@ -214,7 +241,8 @@
+             "clean_pre_onset_families": clean_families,
+             "unresolved_metadata_rows": unresolved,
+             "double_coding_issues": double_coding_issues,
+-            "episode_complete": completed_required == len(required) and unresolved == 0 and double_coding_issues == 0,
++            "historical_warning_eligibility_issues": historical_warning_eligibility_issues,
++            "episode_complete": completed_required == len(required) and unresolved == 0 and double_coding_issues == 0 and historical_warning_eligibility_issues == 0,
+         })
+     return pd.DataFrame(rows)
+ 
+@@ -227,15 +255,18 @@
+         coverage["required_coverage_fraction"].ge(minimum_coverage)
+         & coverage["unresolved_metadata_rows"].eq(0)
+         & coverage["double_coding_issues"].eq(0)
++        & coverage["historical_warning_eligibility_issues"].eq(0)
+     ]
+     independent = int(eligible["dependency_group"].nunique())
+     test_clusters = int(eligible.loc[eligible["phase4_split"].eq("test"), "dependency_group"].nunique())
+     source_classes = int(registry.loc[
+-        registry["is_direct_official"]
++        registry["evidence_present"]
++        & registry["is_direct_official"]
+         & registry["adjudication_status"].isin(["accepted", "not_required"])
+         & registry["document_role"].isin(COVERAGE_ROLES),
+         "source_class",
+     ].nunique()) if not registry.empty else 0
++    unresolved_historical = int(coverage["historical_warning_eligibility_issues"].sum())
+     checks = {
+         "minimum_independent_episode_clusters": independent >= minimum_clusters,
+         "minimum_temporal_test_clusters": test_clusters >= minimum_test,
+@@ -243,7 +274,9 @@
+         "no_unresolved_metadata_in_eligible_clusters": bool(
+             eligible["unresolved_metadata_rows"].eq(0).all()
+             and eligible["double_coding_issues"].eq(0).all()
++            and eligible["historical_warning_eligibility_issues"].eq(0).all()
+         ),
++        "no_unresolved_historical_warning_mappings": unresolved_historical == 0,
+     }
+     return {
+         "status": "pass" if all(checks.values()) else "blocked",
+@@ -258,6 +291,9 @@
+             "eligible_test_clusters": test_clusters,
+             "direct_source_classes": source_classes,
+             "registered_evidence_rows": int(len(registry)),
++            "physical_evidence_rows": int(registry["evidence_present"].sum()) if not registry.empty else 0,
++            "metadata_reference_only_rows": int((~registry["evidence_present"]).sum()) if not registry.empty else 0,
++            "unresolved_historical_warning_mappings": unresolved_historical,
+         },
+         "interpretation": "Physical-onset fusion evaluation is authorized only when status is pass.",
+     }
+@@ -299,21 +335,24 @@
+         "",
+         "## Episode status",
+         "",
+-        "| Episode | Split | Required coverage | Review issues | Clean pre-onset families | Complete |",
+-        "| --- | --- | ---: | ---: | ---: | :---: |",
++        "| Episode | Split | Required coverage | Double-coding issues | Historical-warning issues | Clean pre-onset families | Complete |",
++        "| --- | --- | ---: | ---: | ---: | ---: | :---: |",
+     ]
+     for row in coverage.itertuples(index=False):
+         lines.append(
+             f"| {row.episode_cluster_id} | {row.phase4_split} | "
+             f"{row.completed_required_units}/{row.required_coverage_units} "
+             f"({100 * row.required_coverage_fraction:.1f}%) | {row.double_coding_issues} | "
+-            f"{row.clean_pre_onset_families} | {'Yes' if row.episode_complete else 'No'} |"
++            f"{row.historical_warning_eligibility_issues} | {row.clean_pre_onset_families} | "
++            f"{'Yes' if row.episode_complete else 'No'} |"
+         )
+     lines.extend([
+         "",
+         "## Interpretation",
+         "",
+-        f"Registered evidence rows: **{observed['registered_evidence_rows']}**.",
++        f"Registered metadata rows: **{observed['registered_evidence_rows']}**; physical local evidence rows: **{observed['physical_evidence_rows']}**; metadata-reference-only rows: **{observed['metadata_reference_only_rows']}**.",
++        "",
++        f"Unresolved historical-warning mappings kept ineligible: **{observed['unresolved_historical_warning_mappings']}**.",
+         "",
+         "An episode with zero clean pre-onset families remains a valid negative case once coverage and review requirements are complete. Do not interpret complete coverage as proof of advance warning. While the gate is blocked, source-only and fusion performance files must remain empty and no general lead-time, calibration or action-precision claim is authorized.",
+         "",
+@@ -349,7 +388,8 @@
+     registry.reindex(columns=link_columns).to_csv(links_path, index=False, date_format="%Y-%m-%d")
+     coverage.to_csv(coverage_path, index=False)
+     accepted_tasks = set(registry.loc[
+-        registry["is_direct_official"]
++        registry["evidence_present"]
++        & registry["is_direct_official"]
+         & registry["adjudication_status"].isin(["accepted", "not_required"])
+         & registry["document_role"].isin(COVERAGE_ROLES),
+         "task_id",
+--- /mnt/data/original_v103/src/risksignal/make_phase4_figures.py	2026-09-14 19:29:23.210906600 +0000
++++ src/risksignal/make_phase4_figures.py	2026-09-14 19:26:10.542250679 +0000
+@@ -54,7 +54,8 @@
+             0.5, 0.42,
+             f"Eligible independent clusters: {observed.get('eligible_independent_clusters', 0)}\n"
+             f"Eligible temporal test clusters: {observed.get('eligible_test_clusters', 0)}\n"
+-            "Complete direct-source and zero-result evidence before estimating performance.",
++            f"Unresolved historical-warning mappings: {observed.get('unresolved_historical_warning_mappings', 0)}\n"
++            "Complete direct-source, zero-result, and historical-availability evidence before estimating performance.",
+             ha="center", va="center", fontsize=11,
+         )
+     ax.spines[["top", "right"]].set_visible(False)

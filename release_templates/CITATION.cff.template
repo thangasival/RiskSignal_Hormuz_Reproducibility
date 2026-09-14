@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software or derived results, please cite the archived release and associated paper."
+title: "RiskSignal: Evidence-Gated Energy-Supply Resilience at the Strait of Hormuz"
+type: software
+version: 1.0.0
+date-released: 2026-09-14
+authors:
+  - family-names: "TODO"
+    given-names: "TODO"
+repository-code: "TODO_GITHUB_URL"
+doi: "TODO_ZENODO_DOI"
+license: MIT
